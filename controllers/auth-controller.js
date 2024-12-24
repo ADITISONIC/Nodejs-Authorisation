@@ -43,6 +43,22 @@ const registerUser = async (req, res) => {
   }
 };
 const loginUser = async(req,res)=>{
-    
+    try{
+     const {username,password} = req.body
+     const user = await User.findOne({username})
+     if(!user){
+        return res.status(400).json({
+           success:false,
+           message:"fail"
+        })
+     }
+    }
+    catch(e){
+        console.log(e)
+        res.status(500).json({
+            success:false,
+            message:"failed"
+        })
+    }
 }
 module.exports = { registerUser,loginUser };
