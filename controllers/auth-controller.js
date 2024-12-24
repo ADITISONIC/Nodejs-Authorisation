@@ -52,6 +52,14 @@ const loginUser = async(req,res)=>{
            message:"fail"
         })
      }
+     const ispassword = await bcrypt.compare(password,user.password)
+     if(!ispassword){
+        return res.status(400).json({
+          success: false,
+          message: "fail",
+        }); 
+     }
+     
     }
     catch(e){
         console.log(e)
