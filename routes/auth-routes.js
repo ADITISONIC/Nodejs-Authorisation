@@ -6,3 +6,4 @@ router.post("/register", registerUser); // Correct function usage
 router.post("/login", loginUser);
 
 module.exports = router;
+

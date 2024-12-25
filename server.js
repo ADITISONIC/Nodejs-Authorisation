@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json())
 app.use('/api/auth',authRoutes)
-
+app.use(express.urlencoded({ extended: true }));
 app.listen(PORT,()=>{
     console.log(`Server is now running on ${PORT}`)
 })

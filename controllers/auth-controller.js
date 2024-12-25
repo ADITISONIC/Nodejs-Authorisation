@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 const registerUser = async (req, res) => {
   try {
@@ -42,31 +44,60 @@ const registerUser = async (req, res) => {
     });
   }
 };
-const loginUser = async(req,res)=>{
-    try{
-     const {username,password} = req.body
-     const user = await User.findOne({username})
-     if(!user){
-        return res.status(400).json({
-           success:false,
-           message:"fail"
-        })
-     }
-     const ispassword = await bcrypt.compare(password,user.password)
-     if(!ispassword){
-        return res.status(400).json({
-          success: false,
-          message: "fail",
-        }); 
-     }
-     
+const loginUser = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    // Check if username and password are provided
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and password are required",
+      });
     }
-    catch(e){
-        console.log(e)
-        res.status(500).json({
-            success:false,
-            message:"failed"
-        })
+
+    // Find user by username
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username or password",
+      });
     }
-}
-module.exports = { registerUser,loginUser };
+
+    // Compare provided password with hashed password in the database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid username or password",
+      });
+    }
+
+    // Generate access token
+    const accessToken = jwt.sign(
+      {
+        userId: user._id,
+        username: user.username,
+        role: user.role,
+      },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: "15m" }
+    );
+
+    // Respond with success
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      tokenType: "Bearer",
+      accessToken,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({
+      success: false,
+      message: "An error occurred during login",
+    });
+  }
+};
+module.exports = { registerUser, loginUser };
